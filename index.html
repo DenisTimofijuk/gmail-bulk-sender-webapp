@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <base target="_top">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?!= allTranslations[lang].pageTitle ?></title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .language-selector {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            padding: 8px 15px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .language-selector select {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            outline: none;
+        }
+        
+        .language-selector select option {
+            background: #333;
+            color: white;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            margin-top: 20px;
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .form-container {
+            padding: 40px;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 1.1rem;
+        }
+        
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+        
+        .form-help {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .quota-info {
+            background: #f8f9ff;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .quota-info.loaded {
+            border-color: #667eea;
+        }
+        
+        .submit-section {
+            text-align: center;
+            margin-top: 30px;
+        }
+        
+        .submit-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 18px 50px;
+            border: none;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+        }
+        
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .result {
+            display: none;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+        
+        .result.success {
+            background: #d4edda;
+            border: 2px solid #c3e6cb;
+            color: #155724;
+        }
+        
+        .result.error {
+            background: #f8d7da;
+            border: 2px solid #f5c6cb;
+            color: #721c24;
+        }
+        
+        .example-section {
+            background: #f8f9ff;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #667eea;
+        }
+        
+        .example-section h4 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .example-content {
+            font-family: monospace;
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            color: #666;
+            font-size: 14px;
+            white-space: pre-line;
+        }
+        #headerInstructions {
+           font-size: small;
+            text-align: left;
+            padding: 5px; 
+        }
+        hr {
+            height: 2px;
+            border: none;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin-bottom: 10px;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.7.2/tinymce.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="language-selector">
+                <select id="languageSelect">
+                    <option value="lt">🇱🇹 Lietuvių</option>
+                    <option value="en">🇬🇧 English</option>
+                </select>
+            </div>
+            <h1 id="headerTitle"></h1>
+            <p id="headerSubtitle"></p>
+            <div id="headerInstructions"></div>
+        </div>
+        
+        <div class="form-container">
+            <div class="quota-info" id="quotaInfo">
+                <div style="text-align: center;">
+                    <div class="spinner"></div>
+                    <p id="quotaLoading"></p>
+                </div>
+            </div>
+            
+            <form id="emailForm">
+                <div class="form-group">
+                    <label for="senderName" id="senderNameLabel"></label>
+                    <input type="text" id="senderName" name="senderName" required>
+                </div>
+                <hr>
+                <div class="form-group">
+                    <label for="emailTemplate" id="emailTemplateLabel"></label>
+                    <div id="emailTemplate" style="min-height: 200px; border: 2px solid #e1e5e9; border-radius: 10px;"></div>
+                    <div class="form-help" id="emailTemplateHelp"></div>
+                </div>
+                <div class="example-section">
+                    <h4 id="exampleEmailTemplate"></h4>
+                    <div class="example-content" id="exampleEmailContent"></div>
+                </div>
+                <hr>
+                <div class="form-group">
+                    <label for="subjects" id="subjectsLabel"></label>
+                    <textarea id="subjects" name="subjects" required></textarea>
+                    <div class="form-help" id="subjectsHelp"></div>
+                </div>
+                <div class="example-section">
+                    <h4 id="exampleSubjects"></h4>
+                    <div class="example-content" id="exampleSubjectsList"></div>
+                </div>
+                <hr>
+                <div class="form-group">
+                    <label for="recipients" id="recipientsLabel"></label>
+                    <textarea id="recipients" name="recipients" required></textarea>
+                    <div class="form-help" id="recipientsHelp"></div>
+                </div>
+                
+                <div class="example-section">
+                    <h4 id="exampleRecipients"></h4>
+                    <div class="example-content" id="exampleRecipientsList"></div>
+                </div>
+                <hr>
+                <div class="loading" id="loadingDiv">
+                    <div class="spinner"></div>
+                    <p id="loadingMessage"></p>
+                </div>
+                
+                <div class="result" id="resultDiv"></div>
+                
+                <!-- Progress bar -->
+<div id="progressBarContainer" style="display:none; margin: 20px 0;">
+  <div style="background:#eee; border-radius:10px; overflow:hidden; height:24px;">
+    <div id="progressBar" style="background:linear-gradient(135deg,#667eea,#764ba2);height:100%;width:0%;transition:width 0.5s;"></div>
+  </div>
+  <div id="progressText" style="text-align:center; margin-top:8px; font-weight:600;"></div>
+</div>
+                
+                <div class="submit-section">
+                    <button type="submit" class="submit-btn" id="submitBtn">
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let quotaInfo = null;
+        let allTranslations = <?!= JSON.stringify(allTranslations) ?>;
+        let currentLang = '<?= lang ?>' || 'lt';
+        let translations = allTranslations[currentLang];
+        let progressInterval = null;
+
+        function updatePageLanguage() {
+            translations = allTranslations[currentLang];
+
+            const safeUpdate = (id, property, value) => {
+                try {
+                    const element = document.getElementById(id);
+                    if (!element) {
+                        console.warn(`Element '${id}' not found`);
+                        return false;
+                    }
+                    element[property] = value;
+                    return true;
+                } catch (error) {
+                    console.error(`Error updating ${id}:`, error);
+                    return false;
+                }
+            };
+            
+            safeUpdate('headerTitle', 'textContent', translations.headerTitle);
+            safeUpdate('headerSubtitle', 'textContent', translations.headerSubtitle);
+            safeUpdate('headerInstructions', 'innerHTML', translations.headerInstructions);
+            safeUpdate('quotaLoading', 'textContent', translations.quotaLoading);
+            safeUpdate('senderNameLabel', 'textContent', translations.senderNameLabel);
+            safeUpdate('senderName', 'placeholder', translations.senderNamePlaceholder);
+            safeUpdate('emailTemplateLabel', 'textContent', translations.emailTemplateLabel);
+            safeUpdate('emailTemplateHelp', 'textContent', translations.emailTemplateHelp);
+            safeUpdate('subjectsLabel', 'textContent', translations.subjectsLabel);
+            safeUpdate('subjects', 'placeholder', translations.subjectsPlaceholder);
+            safeUpdate('subjectsHelp', 'textContent', translations.subjectsHelp);
+            safeUpdate('recipientsLabel', 'textContent', translations.recipientsLabel);
+            safeUpdate('recipients', 'placeholder', translations.recipientsPlaceholder);
+            safeUpdate('recipientsHelp', 'textContent', translations.recipientsHelp);
+            safeUpdate('exampleEmailTemplate', 'textContent', translations.exampleEmailTemplate);
+            safeUpdate('exampleEmailContent', 'textContent', translations.exampleEmailContent);
+            safeUpdate('exampleSubjects', 'textContent', translations.exampleSubjects);
+            safeUpdate('exampleSubjectsList', 'textContent', translations.exampleSubjectsList);
+            safeUpdate('exampleRecipients', 'textContent', translations.exampleRecipients);
+            safeUpdate('exampleRecipientsList', 'textContent', translations.exampleRecipientsList);
+            safeUpdate('submitBtn', 'textContent', translations.submitButton);
+            safeUpdate('loadingMessage', 'textContent', translations.loadingMessage);
+            document.title = translations.pageTitle;
+
+            displayQuotaInfo();
+        }
+
+
+
+        // Initialize page
+        window.onload = function() {
+            updatePageLanguage();
+            loadQuotaInfo();
+            // Initialize TinyMCE
+            tinymce.init({
+                selector: '#emailTemplate',
+                height: 300,
+                menubar: false,
+                plugins: 'lists link code',
+                toolbar: 'undo redo | bold italic underline | bullist numlist | link | h1 h2 h3 | code',
+                content_style: 'body { font-family: Arial, sans-serif; font-size: 14px; }',
+                setup: function(editor) {
+                    editor.on('init', function() {
+                        // Set default content with placeholders
+                        editor.setContent(translations.exampleEmailContent.replace(/\n/g, '<br>'));
+                    });
+                }
+            });
+            // init event listener:
+            document.getElementById('languageSelect').addEventListener('change', function() {
+                currentLang = this.value;
+                updatePageLanguage();
+            });
+        };
+        
+        function loadQuotaInfo() {
+            google.script.run
+                .withSuccessHandler(setQuotaInfo)
+                .withFailureHandler(function(error) {
+                    document.getElementById('quotaInfo').innerHTML = '<p style="color: #721c24;">' + translations.quotaError + ' ' + error + '</p>';
+                })
+                .getQuotaInfo();
+        }
+
+        function setQuotaInfo(data){
+            quotaInfo = data;
+            displayQuotaInfo();
+        }
+        
+        function displayQuotaInfo() {
+            const quotaDiv = document.getElementById('quotaInfo');
+            
+            if (quotaInfo && quotaInfo.success) {
+                quotaDiv.className = 'quota-info loaded';
+                quotaDiv.innerHTML = `
+                    <h3 style="margin-bottom: 10px;">${translations.quotaTitle}</h3>
+                    <p><strong>${translations.quotaAccount}</strong> ${quotaInfo.userEmail}</p>
+                    <p><strong>${translations.quotaAvailable}</strong> ${quotaInfo.quota} emails</p>
+                    <p><strong>${translations.quotaAccountType}</strong> ${quotaInfo.isWorkspace ? translations.quotaWorkspace : translations.quotaFree}</p>
+                    <p style="font-size: 14px; color: #666; margin-top: 10px;">${translations.quotaReset}</p>
+                `;
+            } else {
+                quotaDiv.innerHTML = '<p style="color: #721c24;">' + translations.quotaError + ' ' + (quotaInfo?.error || '') + '</p>';
+            }
+        }
+        
+        document.getElementById('emailForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get form data
+            const formData = {
+                lang: currentLang,
+                senderName: document.getElementById('senderName').value,
+                emailTemplate: tinymce.get('emailTemplate').getContent(),
+                subjects: document.getElementById('subjects').value.split('\n').filter(s => s.trim().length > 0),
+                recipients: document.getElementById('recipients').value.split(/[,;\n]/).map(r => r.trim()).filter(r => r.length > 0)
+            };
+            
+            // Add this validation after getting formData:
+if (!formData.emailTemplate || formData.emailTemplate.trim().length === 0) {
+    showResult('Please enter email template content', 'error');
+    return;
+}
+
+            // Validate
+            if (formData.recipients.length === 0) {
+                showResult(translations.noRecipientsError, 'error');
+                return;
+            }
+            
+            if (formData.subjects.length === 0) {
+                showResult(translations.noSubjectsError, 'error');
+            }
+            
+            // Show loading
+            document.getElementById('loadingDiv').style.display = 'block';
+            document.getElementById('submitBtn').disabled = true;
+            document.getElementById('resultDiv').style.display = 'none';
+            
+            // Send request
+            google.script.run
+                .withSuccessHandler(handleSuccess)
+                .withFailureHandler(handleError)
+                .sendBulkEmailsWithProgress(formData);
+
+startProgressPolling();
+        });
+        
+        function handleSuccess(response) {
+            document.getElementById('loadingDiv').style.display = 'none';
+            document.getElementById('submitBtn').disabled = false;
+
+            // Fix: handle null/undefined or malformed response
+            if (!response || typeof response !== 'object' || typeof response.success === 'undefined') {
+                showResult(translations.errorPrefix + "Unexpected server response. Please try again.", 'error');
+                return;
+            }
+
+            if (response.success) {
+                showResult('🎉 ' + response.message, 'success');
+            } else {
+                showResult(translations.errorPrefix + response.message, 'error');
+            }
+        }
+        
+        function handleError(error) {
+            document.getElementById('loadingDiv').style.display = 'none';
+            document.getElementById('submitBtn').disabled = false;
+            showResult(translations.errorPrefix + error, 'error');
+        }
+        
+        function showResult(message, type) {
+            const resultDiv = document.getElementById('resultDiv');
+            resultDiv.className = 'result ' + type;
+            resultDiv.innerHTML = message;
+            resultDiv.style.display = 'block';
+            resultDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function startProgressPolling() {
+    document.getElementById('progressBarContainer').style.display = 'block';
+    updateProgressBar(0, 0, 0);
+    progressInterval = setInterval(fetchProgress, 2000);
+}
+
+function stopProgressPolling() {
+    clearInterval(progressInterval);
+    document.getElementById('progressBarContainer').style.display = 'none';
+}
+
+function fetchProgress() {
+    google.script.run
+        .withSuccessHandler(function(progress) {
+            if (!progress) return;
+            updateProgressBar(progress.sent, progress.failed, progress.total);
+            if (progress.done) {
+                stopProgressPolling();
+            }
+        })
+        .getCurrentProgress();
+}
+
+function updateProgressBar(sent, failed, total) {
+    const percent = total > 0 ? Math.round((sent + failed) / total * 100) : 0;
+    document.getElementById('progressBar').style.width = percent + '%';
+    document.getElementById('progressText').textContent = `Sent: ${sent}, Failed: ${failed}, Total: ${total}`;
+}
+    </script>
+</body>
+</html>
