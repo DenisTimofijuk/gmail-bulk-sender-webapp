@@ -468,7 +468,7 @@ if (!formData.emailTemplate || formData.emailTemplate.trim().length === 0) {
                 .withFailureHandler(handleError)
                 .sendBulkEmailsWithProgress(formData);
 
-startProgressPolling();
+            startProgressPolling();
         });
         
         function handleSuccess(response) {
@@ -503,10 +503,10 @@ startProgressPolling();
         }
 
         function startProgressPolling() {
-    document.getElementById('progressBarContainer').style.display = 'block';
-    updateProgressBar(0, 0, 0);
-    progressInterval = setInterval(fetchProgress, 2000);
-}
+            document.getElementById('progressBarContainer').style.display = 'block';
+            updateProgressBar(0, 0, 0);
+            progressInterval = setInterval(fetchProgress, 2000);
+        }
 
 function stopProgressPolling() {
     clearInterval(progressInterval);

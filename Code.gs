@@ -247,52 +247,6 @@ function doGet(e) {
 }
 
 /**
- * Handles form submission from the web interface
- */
-function sendBulkEmailsFromWeb(formData) {
-  try {
-    const lang = formData.lang || 'lt';
-    const t = TRANSLATIONS[lang] || TRANSLATIONS.lt;
-    
-    // Validate input
-    if (!formData.recipients || formData.recipients.length === 0) {
-      throw new Error(t.noRecipientsError || 'No recipients provided');
-    }
-    
-    if (!formData.subjects || formData.subjects.length === 0) {
-      throw new Error(t.noSubjectsError || 'No subject lines provided');
-    }
-    
-    if (!formData.emailTemplate || formData.emailTemplate.trim().length === 0) {
-      throw new Error('No email template provided');
-    }
-    
-    // Check quota
-    const remainingQuota = MailApp.getRemainingDailyQuota();
-    if (remainingQuota < formData.recipients.length) {
-      throw new Error(`${t.quotaErrorMsg} ${formData.recipients.length}, ${t.available}: ${remainingQuota}`);
-    }
-    
-    // Send emails
-    const results = processEmailCampaign(formData, lang);
-    
-    return {
-      success: true,
-      message: `${t.campaignComplete} ${results.successful.length} ${t.emailsSent}`,
-      details: results
-    };
-    
-  } catch (error) {
-    Logger.log('❌ Error in sendBulkEmailsFromWeb: ' + error.toString());
-    return {
-      success: false,
-      message: error.toString(),
-      details: null
-    };
-  }
-}
-
-/**
  * Core email processing function
  */
 function processEmailCampaign(formData, lang = 'lt') {
@@ -443,12 +397,23 @@ function sendBulkEmailsWithProgress(formData) {
   const userEmail = Session.getActiveUser().getEmail();
   const lang = formData.lang || 'lt';
   const t = TRANSLATIONS[lang] || TRANSLATIONS.lt;
-  const total = formData.recipients.length;
-  let progress = { sent: 0, failed: 0, total: total, done: false, error: null };
+  let total = formData.recipients.length;
+  let remainingQuota = MailApp.getRemainingDailyQuota();
 
+  // --- NEW QUOTA CHECK LOGIC ---
+  if (remainingQuota <= 1) {
+    return { success: false, message: t.quotaErrorMsg + " " + total + ". " + t.available + " " + remainingQuota + ". " + t.quotaError };
+  }
+  if (remainingQuota < total + 1) {
+    // Only send as many as possible, reserve 1 for summary
+    total = Math.max(remainingQuota - 1, 0);
+    formData.recipients = formData.recipients.slice(0, total);
+  }
+  // --- END NEW LOGIC ---
+
+  let progress = { sent: 0, failed: 0, total: total, done: false, error: null };
   setCampaignProgress(userEmail, progress);
 
-  // Track actual results for summary
   const results = {
     successful: [],
     failed: [],
@@ -491,6 +456,11 @@ function sendBulkEmailsWithProgress(formData) {
 
     // Send summary with actual results
     sendCampaignSummary(formData, results, lang);
+
+    // Inform user if not all recipients were emailed
+    if (remainingQuota < formData.recipients.length + 1) {
+      return { success: true, message: t.campaignComplete + " " + t.quotaErrorMsg + " " + (formData.recipients.length + 1) + ". " + t.available + " " + remainingQuota + ". Only " + total + " emails sent." };
+    }
 
     return { success: true, message: t.campaignComplete };
   } catch (error) {
