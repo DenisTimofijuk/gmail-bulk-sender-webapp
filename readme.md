@@ -82,5 +82,6 @@ cd bulk-email-sender-webapp
 - No data is stored or shared externally.
 
 ---
-
+[Demo (not yet verified by Google)](https://script.google.com/macros/s/AKfycbw3xAiRWyhEC2Ht4a8D1U30hx9z4tAVUInBhpVW-T9RGD9v0YhkfDeTSugFICfR4BHxPw/exec)
+  
 **Public domain. Use, modify, and share freely!**
