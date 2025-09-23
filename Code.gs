@@ -25,7 +25,7 @@ const TRANSLATIONS = {
       <div style="margin-bottom:1em;">
         <strong>How does it work?</strong><br>
         - All emails are sent from your Gmail account and appear in your Gmail "Sent" folder.<br>
-        - You can use HTML and placeholders like <code>[SENDER_NAME]</code> and <code>[RECIPIENT_EMAIL]</code> in your email template.<br>
+        - You can use HTML and placeholders like <code>[RECIPIENT_EMAIL]</code> in your email template.<br>
         - Enter several subject lines—each recipient gets a randomly chosen one.<br>
         - Your daily Gmail/Workspace sending quota applies. The app shows your quota and progress.
       </div>
@@ -48,8 +48,8 @@ const TRANSLATIONS = {
     senderNameLabel: "Your Name",
     senderNamePlaceholder: "This will appear as the sender name",
     emailTemplateLabel: "Email Template",
-    emailTemplatePlaceholder: "Write your email content here. Use [SENDER_NAME] for your name and [RECIPIENT_EMAIL] for recipient's email. HTML is supported.",
-    emailTemplateHelp: "You can use HTML for formatting. Placeholders: [SENDER_NAME], [RECIPIENT_EMAIL]",
+    emailTemplatePlaceholder: "Write your email content here. Use [RECIPIENT_EMAIL] for recipient's email. HTML is supported.",
+    emailTemplateHelp: "You can use HTML for formatting. Placeholders: [RECIPIENT_EMAIL]",
     subjectsLabel: "Subject Lines",
     subjectsPlaceholder: "Enter multiple subject lines, one per line. One will be randomly selected for each email.",
     subjectsHelp: "Enter one subject per line. Each email will get a randomly selected subject.",
@@ -63,10 +63,9 @@ const TRANSLATIONS = {
 
 I hope this email finds you well.
 
-This is a personalized message sent to [RECIPIENT_EMAIL] from [SENDER_NAME].
+This is a personalized message sent to [RECIPIENT_EMAIL].
 
-Best regards,
-[SENDER_NAME]`,
+Best regards`,
     exampleSubjects: "📬 Example Subject Lines:",
     exampleSubjectsList: `Quick update for you
 Hope you're doing well  
@@ -133,7 +132,7 @@ alice@domain.org`,
     <div style="margin-bottom:1em;">
       <strong>Kaip tai veikia?</strong><br>
       - Visi laiškai siunčiami iš jūsų Gmail paskyros ir matomi aplanke „Išsiųsti“. <br>
-      - Laiško šablone galima naudoti HTML bei žymes, pvz.: <code>[SENDER_NAME]</code>, <code>[RECIPIENT_EMAIL]</code>. <br>
+      - Laiško šablone galima naudoti HTML bei žymes, pvz.: <code>[RECIPIENT_EMAIL]</code>. <br>
       - Galite įrašyti kelias laiško temas – kiekvienam gavėjui bus parinkta atsitiktinė. <br>
       - Galioja jūsų kasdienė Gmail/Workspace siuntimo kvota. Programa rodo kvotos būseną ir progresą.
     </div>
@@ -156,8 +155,8 @@ alice@domain.org`,
   senderNameLabel: "Jūsų vardas",
   senderNamePlaceholder: "Bus rodomas kaip siuntėjo vardas",
   emailTemplateLabel: "Laiško šablonas",
-  emailTemplatePlaceholder: "Čia rašykite laiško turinį. Naudokite [SENDER_NAME] – jūsų vardui, [RECIPIENT_EMAIL] – gavėjo adresui. Palaikomas HTML.",
-  emailTemplateHelp: "Galite naudoti HTML formatavimui. Žymės: [SENDER_NAME], [RECIPIENT_EMAIL]",
+  emailTemplatePlaceholder: "Čia rašykite laiško turinį. Naudokite [RECIPIENT_EMAIL] – gavėjo adresui. Palaikomas HTML.",
+  emailTemplateHelp: "Galite naudoti HTML formatavimui. Žymės: [RECIPIENT_EMAIL]",
   subjectsLabel: "Temos",
   subjectsPlaceholder: "Įveskite kelias laiško temas, po vieną eilutėje. Kiekvienam gavėjui bus parinkta atsitiktinė tema.",
   subjectsHelp: "Įrašykite po vieną temą eilutėje. Kiekvienas laiškas gaus atsitiktinai parinktą temą.",
@@ -171,10 +170,9 @@ alice@domain.org`,
 
 Tikiuosi, šis laiškas jus pasiekė tinkamu metu.
 
-Tai suasmenintas pranešimas, išsiųstas adresu [RECIPIENT_EMAIL] nuo [SENDER_NAME].
+Tai suasmenintas pranešimas, išsiųstas adresu [RECIPIENT_EMAIL].
 
-Pagarbiai,  
-[SENDER_NAME]`,
+Pagarbiai`,
   exampleSubjects: "📬 Laiškų temų pavyzdžiai:",
   exampleSubjectsList: `Trumpas atnaujinimas
 Tikiuosi, jums sekasi gerai
@@ -263,7 +261,6 @@ function processEmailCampaign(formData, lang = 'lt') {
       
       // Prepare email body
       const emailBody = formData.emailTemplate
-        .replace(/\[SENDER_NAME\]/g, formData.senderName || Session.getActiveUser().getDisplayName())
         .replace(/\[RECIPIENT_EMAIL\]/g, recipient);
       
       // Send email
@@ -271,7 +268,7 @@ function processEmailCampaign(formData, lang = 'lt') {
         to: recipient.trim(),
         subject: randomSubject,
         htmlBody: emailBody,
-        name: formData.senderName || Session.getActiveUser().getDisplayName()
+        name: Session.getActiveUser().getDisplayName()
       });
       
       results.successful.push({ recipient, subject: randomSubject });
@@ -425,14 +422,13 @@ function sendBulkEmailsWithProgress(formData) {
       try {
         const randomSubject = formData.subjects[Math.floor(Math.random() * formData.subjects.length)];
         const emailBody = formData.emailTemplate
-          .replace(/\[SENDER_NAME\]/g, formData.senderName || Session.getActiveUser().getDisplayName())
           .replace(/\[RECIPIENT_EMAIL\]/g, recipient);
 
         MailApp.sendEmail({
           to: recipient.trim(),
           subject: randomSubject,
           htmlBody: emailBody,
-          name: formData.senderName || Session.getActiveUser().getDisplayName()
+          name: Session.getActiveUser().getDisplayName()
         });
 
         progress.sent++;

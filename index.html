@@ -259,10 +259,6 @@
             </div>
             
             <form id="emailForm">
-                <div class="form-group">
-                    <label for="senderName" id="senderNameLabel"></label>
-                    <input type="text" id="senderName" name="senderName" required>
-                </div>
                 <hr>
                 <div class="form-group">
                     <label for="emailTemplate" id="emailTemplateLabel"></label>
@@ -348,7 +344,6 @@
             safeUpdate('headerInstructions', 'innerHTML', translations.headerInstructions);
             safeUpdate('quotaLoading', 'textContent', translations.quotaLoading);
             safeUpdate('senderNameLabel', 'textContent', translations.senderNameLabel);
-            safeUpdate('senderName', 'placeholder', translations.senderNamePlaceholder);
             safeUpdate('emailTemplateLabel', 'textContent', translations.emailTemplateLabel);
             safeUpdate('emailTemplateHelp', 'textContent', translations.emailTemplateHelp);
             safeUpdate('subjectsLabel', 'textContent', translations.subjectsLabel);
@@ -435,7 +430,6 @@
             // Get form data
             const formData = {
                 lang: currentLang,
-                senderName: document.getElementById('senderName').value,
                 emailTemplate: tinymce.get('emailTemplate').getContent(),
                 subjects: document.getElementById('subjects').value.split('\n').filter(s => s.trim().length > 0),
                 recipients: document.getElementById('recipients').value.split(/[,;\n]/).map(r => r.trim()).filter(r => r.length > 0)
